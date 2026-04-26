@@ -7,7 +7,7 @@ export default function NewNotePage() {
       <header className="mb-8">
         <Link
           href="/notes"
-          className="text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-200"
+          className="text-muted-foreground hover:text-foreground text-sm"
         >
           ← Notes
         </Link>
