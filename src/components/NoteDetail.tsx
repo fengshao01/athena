@@ -74,6 +74,10 @@ export default function NoteDetail({
   const cardsToShow: DisplayCard[] = isLoading ? streamingCards : cards;
 
   function runGenerate() {
+    if (!note.body.trim()) {
+      toast.error("Add some content to the note first.");
+      return;
+    }
     submit({ noteId: note.id });
   }
 

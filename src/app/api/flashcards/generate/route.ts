@@ -25,6 +25,12 @@ export async function POST(req: Request) {
     return new Response("Note not found", { status: 404 });
   }
 
+  if (!note.body.trim()) {
+    return new Response("Add some content to the note first.", {
+      status: 400,
+    });
+  }
+
   const result = streamObject({
     model: anthropic("claude-sonnet-4-6"),
     schema: FlashcardsObjectSchema,
