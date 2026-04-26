@@ -8,7 +8,7 @@ Sorted by impact-to-effort. The loop picks the first `- [ ]` and works it end-to
 - [x] **4. Run the shadcn sweep on `/notes` and `/notes/new`** — replace "New note" link with `<Button asChild>`; swap `text-zinc-* / divide-zinc-*` for semantic tokens (`text-muted-foreground`, `border-border`, `hover:bg-muted`).
 - [x] **5. Title `break-words` + body collapse with "Show more"** — add `break-words` to titles + flashcard front/back; cap note body at `max-h-64` with toggle.
 - [x] **6. Stream flashcard generation progressively** — switch `generateFlashcards` from `generateText` to `streamObject` so cards appear as they arrive.
-- [ ] **7. `variant="destructive"` on the Regenerate button in the confirm Dialog**.
+- [x] **7. `variant="destructive"` on the Regenerate button in the confirm Dialog**.
 - [ ] **8. Add `cyrillic`, `cyrillic-ext`, `latin-ext` subsets to the Geist fonts in `layout.tsx`**.
 - [ ] **9. Empty-body guard in `generateFlashcards`** — refuse with `toast.error("Add some content first.")` if `note.body.trim() === ""`.
 - [ ] **10. Surface `recordReview` failure** — replace `.catch(() => {})` in `Practice.tsx` with a `toast.error`.

@@ -181,7 +181,9 @@ export default function NoteDetail({
             <DialogClose asChild>
               <Button variant="outline">Cancel</Button>
             </DialogClose>
-            <Button onClick={confirmRegenerate}>Regenerate</Button>
+            <Button variant="destructive" onClick={confirmRegenerate}>
+              Regenerate
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
