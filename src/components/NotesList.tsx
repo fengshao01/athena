@@ -1,13 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useIsClient, useNotes } from "@/lib/notes-store";
+import type { listNotes } from "@/app/notes/actions";
 
-export default function NotesList() {
-  const notes = useNotes();
-  const isClient = useIsClient();
+type Notes = Awaited<ReturnType<typeof listNotes>>;
 
-  if (isClient && notes.length === 0) {
+export default function NotesList({ notes }: { notes: Notes }) {
+  if (notes.length === 0) {
     return <p className="text-sm text-zinc-500">No notes yet.</p>;
   }
 
@@ -20,8 +19,11 @@ export default function NotesList() {
             className="flex flex-col gap-0.5 rounded px-2 py-3 hover:bg-zinc-100 dark:hover:bg-zinc-900"
           >
             <span className="font-medium">{note.title || "Untitled"}</span>
-            <span className="text-xs text-zinc-500">
-              {new Date(note.createdAt).toLocaleString()}
+            <span
+              className="text-xs text-zinc-500"
+              suppressHydrationWarning
+            >
+              {note.createdAt.toLocaleString()}
             </span>
           </Link>
         </li>

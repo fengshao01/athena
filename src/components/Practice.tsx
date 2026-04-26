@@ -2,17 +2,19 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { useCards, useIsClient } from "@/lib/notes-store";
+import { recordReview, type listForNote } from "@/app/flashcards/actions";
 
-export default function Practice({ noteId }: { noteId: string }) {
-  const cards = useCards(noteId);
-  const isClient = useIsClient();
+type Cards = Awaited<ReturnType<typeof listForNote>>;
+
+export default function Practice({
+  noteId,
+  cards,
+}: {
+  noteId: string;
+  cards: Cards;
+}) {
   const [index, setIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
-
-  if (!isClient) {
-    return <p className="text-sm text-zinc-500">Loading…</p>;
-  }
 
   if (cards.length === 0) {
     return (
@@ -55,7 +57,10 @@ export default function Practice({ noteId }: { noteId: string }) {
 
   const card = cards[index];
 
-  function advance() {
+  function rate(rating: "got" | "missed") {
+    const cardId = card.id;
+    // Fire-and-forget: a network blip shouldn't block the quiz.
+    void recordReview(cardId, rating).catch(() => {});
     setFlipped(false);
     setIndex((i) => i + 1);
   }
@@ -75,14 +80,14 @@ export default function Practice({ noteId }: { noteId: string }) {
       <div className="flex gap-3">
         <button
           type="button"
-          onClick={advance}
+          onClick={() => rate("missed")}
           className="flex-1 rounded-md border border-zinc-300 px-4 py-2 text-sm font-medium hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-900"
         >
           Missed
         </button>
         <button
           type="button"
-          onClick={advance}
+          onClick={() => rate("got")}
           className="flex-1 rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200"
         >
           Got it

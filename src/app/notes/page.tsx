@@ -1,7 +1,10 @@
 import Link from "next/link";
 import NotesList from "@/components/NotesList";
+import { listNotes } from "./actions";
 
-export default function NotesPage() {
+export default async function NotesPage() {
+  const notes = await listNotes();
+
   return (
     <div className="mx-auto w-full max-w-2xl px-6 py-12">
       <header className="mb-8 flex items-center justify-between">
@@ -13,7 +16,7 @@ export default function NotesPage() {
           New note
         </Link>
       </header>
-      <NotesList />
+      <NotesList notes={notes} />
     </div>
   );
 }

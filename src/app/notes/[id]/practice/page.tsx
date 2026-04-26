@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Practice from "@/components/Practice";
+import { listForNote } from "@/app/flashcards/actions";
 
 export default async function PracticePage({
   params,
@@ -7,6 +8,8 @@ export default async function PracticePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const cards = await listForNote(id);
+
   return (
     <div className="mx-auto w-full max-w-2xl px-6 py-12">
       <header className="mb-6">
@@ -17,7 +20,7 @@ export default async function PracticePage({
           ← Note
         </Link>
       </header>
-      <Practice noteId={id} />
+      <Practice noteId={id} cards={cards} />
     </div>
   );
 }
