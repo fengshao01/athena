@@ -8,6 +8,13 @@
       "when": 1777225989376,
       "tag": "0000_square_thunderbolt",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1777228205730,
+      "tag": "0001_wise_doctor_faustus",
+      "breakpoints": true
     }
   ]
 }

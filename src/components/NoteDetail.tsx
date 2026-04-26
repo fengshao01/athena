@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import type { getNote } from "@/app/notes/actions";
-import { createFlashcards, type listForNote } from "@/app/flashcards/actions";
+import { generateFlashcards, type listForNote } from "@/app/flashcards/actions";
 
 type Note = NonNullable<Awaited<ReturnType<typeof getNote>>>;
 type Cards = Awaited<ReturnType<typeof listForNote>>;
@@ -16,10 +16,22 @@ export default function NoteDetail({
   cards: Cards;
 }) {
   const [isPending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!error) return;
+    const t = setTimeout(() => setError(null), 5000);
+    return () => clearTimeout(t);
+  }, [error]);
 
   function generate() {
+    setError(null);
     startTransition(async () => {
-      await createFlashcards(note.id);
+      try {
+        await generateFlashcards(note.id);
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Something went wrong.");
+      }
     });
   }
 
@@ -70,6 +82,15 @@ export default function NoteDetail({
             ))}
           </ul>
         </section>
+      )}
+
+      {error && (
+        <div
+          role="alert"
+          className="fixed bottom-4 left-1/2 -translate-x-1/2 rounded-md border border-red-300 bg-red-50 px-4 py-2 text-sm text-red-900 shadow-md dark:border-red-700 dark:bg-red-950 dark:text-red-100"
+        >
+          {error}
+        </div>
       )}
     </article>
   );

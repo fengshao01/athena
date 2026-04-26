@@ -1,5 +1,7 @@
 import Link from "next/link";
+import ChatPanel from "@/components/ChatPanel";
 import NoteDetail from "@/components/NoteDetail";
+import { listChatMessages } from "@/app/chat/actions";
 import { listForNote } from "@/app/flashcards/actions";
 import { getNote } from "../actions";
 
@@ -9,7 +11,11 @@ export default async function NotePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [note, cards] = await Promise.all([getNote(id), listForNote(id)]);
+  const [note, cards, chat] = await Promise.all([
+    getNote(id),
+    listForNote(id),
+    listChatMessages(id),
+  ]);
 
   return (
     <div className="mx-auto w-full max-w-2xl px-6 py-12">
@@ -22,7 +28,10 @@ export default async function NotePage({
         </Link>
       </header>
       {note ? (
-        <NoteDetail note={note} cards={cards} />
+        <div className="flex flex-col gap-10">
+          <NoteDetail note={note} cards={cards} />
+          <ChatPanel noteId={id} initialMessages={chat} />
+        </div>
       ) : (
         <div className="flex flex-col gap-3">
           <p className="text-sm text-zinc-500">Note not found.</p>
