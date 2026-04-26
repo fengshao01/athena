@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { toast } from "sonner";
 import { recordReview, type listForNote } from "@/app/flashcards/actions";
 import { Button } from "@/components/ui/button";
 
@@ -59,7 +60,9 @@ export default function Practice({
 
   function rate(rating: "got" | "missed") {
     const cardId = card.id;
-    void recordReview(cardId, rating).catch(() => {});
+    recordReview(cardId, rating).catch(() => {
+      toast.error("Couldn't save rating.");
+    });
     setFlipped(false);
     setIndex((i) => i + 1);
   }

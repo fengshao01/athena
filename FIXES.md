@@ -11,4 +11,4 @@ Sorted by impact-to-effort. The loop picks the first `- [ ]` and works it end-to
 - [x] **7. `variant="destructive"` on the Regenerate button in the confirm Dialog**.
 - [x] **8. Add `cyrillic`, `cyrillic-ext`, `latin-ext` subsets to the Geist fonts in `layout.tsx`**. (Geist doesn't ship a `cyrillic-ext` subset; added `cyrillic` and `latin-ext`.)
 - [x] **9. Empty-body guard in `generateFlashcards`** — refuse with `toast.error("Add some content first.")` if `note.body.trim() === ""`. (Applied to both the client click handler and the route handler since fix #6 moved generation to /api/flashcards/generate.)
-- [ ] **10. Surface `recordReview` failure** — replace `.catch(() => {})` in `Practice.tsx` with a `toast.error`.
+- [x] **10. Surface `recordReview` failure** — replace `.catch(() => {})` in `Practice.tsx` with a `toast.error`.
