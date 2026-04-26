@@ -18,7 +18,9 @@ export default function NotesList({ notes }: { notes: Notes }) {
             href={`/notes/${note.id}`}
             className="hover:bg-muted flex flex-col gap-0.5 rounded px-2 py-3"
           >
-            <span className="font-medium">{note.title || "Untitled"}</span>
+            <span className="font-medium break-words">
+              {note.title || "Untitled"}
+            </span>
             <span
               className="text-muted-foreground text-xs"
               suppressHydrationWarning

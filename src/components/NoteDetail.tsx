@@ -17,9 +17,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
 
 type Note = NonNullable<Awaited<ReturnType<typeof getNote>>>;
 type Cards = Awaited<ReturnType<typeof listForNote>>;
+
+const BODY_COLLAPSE_THRESHOLD = 400;
 
 export default function NoteDetail({
   note,
@@ -30,6 +33,10 @@ export default function NoteDetail({
 }) {
   const [isPending, startTransition] = useTransition();
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [bodyExpanded, setBodyExpanded] = useState(false);
+
+  const isBodyLong = note.body.length > BODY_COLLAPSE_THRESHOLD;
+  const collapseBody = isBodyLong && !bodyExpanded;
 
   function runGenerate() {
     startTransition(async () => {
@@ -59,11 +66,29 @@ export default function NoteDetail({
 
   return (
     <article className="flex flex-col gap-6">
-      <h1 className="text-2xl font-semibold">{note.title}</h1>
+      <h1 className="text-2xl font-semibold break-words">{note.title}</h1>
       {note.body && (
-        <p className="text-muted-foreground whitespace-pre-wrap text-sm">
-          {note.body}
-        </p>
+        <div className="flex flex-col gap-2">
+          <p
+            className={cn(
+              "text-muted-foreground text-sm whitespace-pre-wrap break-words",
+              collapseBody && "max-h-64 overflow-hidden",
+            )}
+          >
+            {note.body}
+          </p>
+          {isBodyLong && (
+            <div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setBodyExpanded((v) => !v)}
+              >
+                {bodyExpanded ? "Show less" : "Show more"}
+              </Button>
+            </div>
+          )}
+        </div>
       )}
 
       <div className="flex items-center gap-3 border-t border-border pt-4">
@@ -99,8 +124,8 @@ export default function NoteDetail({
               <li key={c.id}>
                 <Card size="sm">
                   <CardContent className="flex flex-col gap-2.5">
-                    <div className="font-medium">{c.front}</div>
-                    <div className="border-t border-border pt-2.5">
+                    <div className="font-medium break-words">{c.front}</div>
+                    <div className="border-t border-border pt-2.5 break-words">
                       {c.back}
                     </div>
                   </CardContent>
