@@ -5,7 +5,7 @@ import { generateText, type ModelMessage } from "ai";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { db } from "@/db";
+import { db, isUuid } from "@/db";
 import { flashcards, notes, reviews, type Flashcard } from "@/db/schema";
 
 const HARDCODED_CARDS: ReadonlyArray<{ front: string; back: string }> = [
@@ -38,6 +38,7 @@ export async function createFlashcards(
 }
 
 export async function listForNote(noteId: string): Promise<Flashcard[]> {
+  if (!isUuid(noteId)) return [];
   return db.select().from(flashcards).where(eq(flashcards.noteId, noteId));
 }
 

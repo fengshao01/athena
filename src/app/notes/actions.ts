@@ -2,7 +2,7 @@
 
 import { desc, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { db } from "@/db";
+import { db, isUuid } from "@/db";
 import { notes, type Note } from "@/db/schema";
 
 export async function createNote(input: {
@@ -22,11 +22,13 @@ export async function listNotes(): Promise<Note[]> {
 }
 
 export async function getNote(id: string): Promise<Note | null> {
+  if (!isUuid(id)) return null;
   const [note] = await db.select().from(notes).where(eq(notes.id, id)).limit(1);
   return note ?? null;
 }
 
 export async function deleteNote(id: string): Promise<void> {
+  if (!isUuid(id)) return;
   await db.delete(notes).where(eq(notes.id, id));
   revalidatePath("/notes");
 }
