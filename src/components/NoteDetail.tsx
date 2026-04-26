@@ -1,11 +1,19 @@
 "use client";
 
-import { BookOpenIcon, Loader2Icon, SparklesIcon } from "lucide-react";
+import { experimental_useObject as useObject } from "@ai-sdk/react";
+import {
+  BookOpenIcon,
+  Loader2Icon,
+  SparklesIcon,
+  SquareIcon,
+} from "lucide-react";
 import Link from "next/link";
-import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { type listForNote } from "@/app/flashcards/actions";
+import { FlashcardsObjectSchema } from "@/app/flashcards/schema";
 import type { getNote } from "@/app/notes/actions";
-import { generateFlashcards, type listForNote } from "@/app/flashcards/actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -24,6 +32,8 @@ type Cards = Awaited<ReturnType<typeof listForNote>>;
 
 const BODY_COLLAPSE_THRESHOLD = 400;
 
+type DisplayCard = { id: string; front: string; back: string };
+
 export default function NoteDetail({
   note,
   cards,
@@ -31,24 +41,40 @@ export default function NoteDetail({
   note: Note;
   cards: Cards;
 }) {
-  const [isPending, startTransition] = useTransition();
+  const router = useRouter();
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [bodyExpanded, setBodyExpanded] = useState(false);
+
+  const { object, submit, isLoading, stop, error } = useObject({
+    api: "/api/flashcards/generate",
+    schema: FlashcardsObjectSchema,
+    onFinish: ({ object: finalObject }) => {
+      if (finalObject) {
+        toast.success(`Generated ${finalObject.cards.length} flashcards.`);
+        router.refresh();
+      }
+    },
+  });
+
+  useEffect(() => {
+    if (error) {
+      toast.error(error.message);
+    }
+  }, [error]);
 
   const isBodyLong = note.body.length > BODY_COLLAPSE_THRESHOLD;
   const collapseBody = isBodyLong && !bodyExpanded;
 
+  const streamingCards: DisplayCard[] = (object?.cards ?? []).map((c, i) => ({
+    id: `streaming-${i}`,
+    front: c?.front ?? "",
+    back: c?.back ?? "",
+  }));
+
+  const cardsToShow: DisplayCard[] = isLoading ? streamingCards : cards;
+
   function runGenerate() {
-    startTransition(async () => {
-      try {
-        const created = await generateFlashcards(note.id);
-        toast.success(`Generated ${created.length} flashcards.`);
-      } catch (err) {
-        toast.error(
-          err instanceof Error ? err.message : "Generation failed.",
-        );
-      }
-    });
+    submit({ noteId: note.id });
   }
 
   function handleClick() {
@@ -92,19 +118,25 @@ export default function NoteDetail({
       )}
 
       <div className="flex items-center gap-3 border-t border-border pt-4">
-        <Button onClick={handleClick} disabled={isPending}>
-          {isPending ? (
+        <Button onClick={handleClick} disabled={isLoading}>
+          {isLoading ? (
             <Loader2Icon className="animate-spin" />
           ) : (
             <SparklesIcon />
           )}
-          {isPending
+          {isLoading
             ? "Generating…"
             : cards.length === 0
               ? "Generate flashcards"
               : "Regenerate flashcards"}
         </Button>
-        {cards.length > 0 && (
+        {isLoading && (
+          <Button type="button" variant="outline" onClick={() => stop()}>
+            <SquareIcon />
+            Stop
+          </Button>
+        )}
+        {!isLoading && cards.length > 0 && (
           <Button asChild variant="outline">
             <Link href={`/notes/${note.id}/practice`}>
               <BookOpenIcon />
@@ -114,13 +146,13 @@ export default function NoteDetail({
         )}
       </div>
 
-      {cards.length > 0 && (
+      {cardsToShow.length > 0 && (
         <section className="flex flex-col gap-2">
           <h2 className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
             Cards
           </h2>
           <ul className="flex flex-col gap-2">
-            {cards.map((c) => (
+            {cardsToShow.map((c) => (
               <li key={c.id}>
                 <Card size="sm">
                   <CardContent className="flex flex-col gap-2.5">
