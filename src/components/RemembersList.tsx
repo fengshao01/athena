@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useSyncExternalStore, type FormEvent } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 type Item = { id: string; text: string; done: boolean };
 
@@ -65,7 +67,9 @@ export default function RemembersList() {
 
   function toggle(id: string) {
     writeItems(
-      items.map((item) => (item.id === id ? { ...item, done: !item.done } : item)),
+      items.map((item) =>
+        item.id === id ? { ...item, done: !item.done } : item,
+      ),
     );
   }
 
@@ -75,32 +79,27 @@ export default function RemembersList() {
 
   return (
     <section>
-      <h2 className="mb-3 text-xs font-medium uppercase tracking-wider text-zinc-500">
+      <h2 className="text-muted-foreground mb-3 text-xs font-medium tracking-wider uppercase">
         Things to remember
       </h2>
 
       <form onSubmit={handleAdd} className="flex gap-2">
-        <input
+        <Input
           type="text"
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           placeholder="Add something…"
-          className="flex-1 rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-500 focus:outline-none dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
         />
-        <button
-          type="submit"
-          disabled={!draft.trim()}
-          className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 disabled:opacity-50 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200"
-        >
+        <Button type="submit" disabled={!draft.trim()}>
           Add
-        </button>
+        </Button>
       </form>
 
       <ul className="mt-4 flex flex-col gap-1">
         {items.map((item) => (
           <li
             key={item.id}
-            className="group flex items-center gap-3 rounded-md px-2 py-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-900"
+            className="group hover:bg-muted flex items-center gap-3 rounded-md px-2 py-1.5"
           >
             <input
               type="checkbox"
@@ -111,24 +110,28 @@ export default function RemembersList() {
             <span
               className={
                 item.done
-                  ? "flex-1 text-sm text-zinc-400 line-through"
-                  : "flex-1 text-sm text-zinc-900 dark:text-zinc-50"
+                  ? "text-muted-foreground flex-1 text-sm line-through"
+                  : "flex-1 text-sm"
               }
             >
               {item.text}
             </span>
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="icon-xs"
               onClick={() => remove(item.id)}
               aria-label={`Delete "${item.text}"`}
-              className="rounded px-2 text-zinc-400 opacity-0 hover:bg-zinc-200 hover:text-zinc-700 group-hover:opacity-100 focus:opacity-100 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
+              className="opacity-0 group-hover:opacity-100 focus:opacity-100"
             >
               ×
-            </button>
+            </Button>
           </li>
         ))}
         {isClient && items.length === 0 && (
-          <li className="px-2 py-1.5 text-sm text-zinc-400">Nothing yet.</li>
+          <li className="text-muted-foreground px-2 py-1.5 text-sm">
+            Nothing yet.
+          </li>
         )}
       </ul>
     </section>

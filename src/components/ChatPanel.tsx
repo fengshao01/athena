@@ -3,13 +3,31 @@
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, isTextUIPart, type UIMessage } from "ai";
 import {
+  MessageSquareIcon,
+  SendHorizonalIcon,
+  SquareIcon,
+} from "lucide-react";
+import {
   useEffect,
   useMemo,
   useRef,
   useState,
   type FormEvent,
 } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { toast } from "sonner";
 import type { listChatMessages } from "@/app/chat/actions";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type Initial = Awaited<ReturnType<typeof listChatMessages>>;
 
@@ -19,6 +37,13 @@ function toUIMessage(m: Initial[number]): UIMessage {
     role: m.role,
     parts: [{ type: "text", text: m.content }],
   };
+}
+
+function textOf(m: UIMessage): string {
+  return m.parts
+    .filter(isTextUIPart)
+    .map((p) => p.text)
+    .join("");
 }
 
 export default function ChatPanel({
@@ -54,7 +79,14 @@ export default function ChatPanel({
     bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [messages]);
 
+  useEffect(() => {
+    if (error) {
+      toast.error(error.message);
+    }
+  }, [error]);
+
   const isStreaming = status === "submitted" || status === "streaming";
+  const showPendingSkeleton = status === "submitted";
 
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -65,15 +97,17 @@ export default function ChatPanel({
   }
 
   return (
-    <section className="flex flex-col gap-3">
-      <h2 className="text-xs font-medium uppercase tracking-wider text-zinc-500">
-        Chat
-      </h2>
-
-      <div className="rounded-md border border-zinc-200 dark:border-zinc-800">
-        <div className="max-h-96 overflow-y-auto p-3">
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <MessageSquareIcon className="size-4" />
+          Chat
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="max-h-96 overflow-y-auto">
           {messages.length === 0 ? (
-            <p className="text-sm text-zinc-400">
+            <p className="text-muted-foreground text-sm">
               Ask a question about this note.
             </p>
           ) : (
@@ -83,60 +117,53 @@ export default function ChatPanel({
                   key={m.id}
                   className={
                     m.role === "user"
-                      ? "max-w-[85%] self-end rounded-md bg-zinc-900 px-3 py-2 text-sm text-white dark:bg-zinc-50 dark:text-zinc-900"
-                      : "max-w-[85%] self-start rounded-md bg-zinc-100 px-3 py-2 text-sm text-zinc-900 dark:bg-zinc-900 dark:text-zinc-100"
+                      ? "bg-primary text-primary-foreground max-w-[85%] self-end rounded-2xl px-3.5 py-2 text-sm"
+                      : "bg-muted text-foreground max-w-[85%] self-start rounded-2xl px-3.5 py-2 text-sm"
                   }
                 >
-                  <div className="whitespace-pre-wrap">
-                    {m.parts
-                      .filter(isTextUIPart)
-                      .map((p) => p.text)
-                      .join("")}
-                  </div>
+                  {m.role === "assistant" ? (
+                    <div className="prose prose-sm dark:prose-invert max-w-none [&>:first-child]:mt-0 [&>:last-child]:mb-0">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {textOf(m)}
+                      </ReactMarkdown>
+                    </div>
+                  ) : (
+                    <div className="whitespace-pre-wrap">{textOf(m)}</div>
+                  )}
                 </li>
               ))}
+              {showPendingSkeleton && (
+                <li className="bg-muted max-w-[85%] self-start rounded-2xl px-3.5 py-2.5">
+                  <Skeleton className="h-3 w-32" />
+                </li>
+              )}
             </ul>
           )}
           <div ref={bottomRef} />
         </div>
-
-        <form
-          onSubmit={handleSubmit}
-          className="flex gap-2 border-t border-zinc-200 p-3 dark:border-zinc-800"
-        >
-          <input
+      </CardContent>
+      <CardFooter>
+        <form onSubmit={handleSubmit} className="flex w-full gap-2">
+          <Input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Ask Athena…"
             disabled={isStreaming}
-            className="flex-1 rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none disabled:opacity-50 dark:border-zinc-700 dark:bg-zinc-900"
           />
           {isStreaming ? (
-            <button
-              type="button"
-              onClick={() => void stop()}
-              className="rounded-md border border-zinc-300 px-4 py-2 text-sm font-medium hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-900"
-            >
+            <Button type="button" variant="outline" onClick={() => void stop()}>
+              <SquareIcon />
               Stop
-            </button>
+            </Button>
           ) : (
-            <button
-              type="submit"
-              disabled={!input.trim()}
-              className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 disabled:opacity-50 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200"
-            >
+            <Button type="submit" disabled={!input.trim()}>
+              <SendHorizonalIcon />
               Send
-            </button>
+            </Button>
           )}
         </form>
-
-        {error && (
-          <p className="border-t border-red-200 bg-red-50 px-3 py-2 text-sm text-red-900 dark:border-red-900 dark:bg-red-950 dark:text-red-100">
-            {error.message}
-          </p>
-        )}
-      </div>
-    </section>
+      </CardFooter>
+    </Card>
   );
 }
