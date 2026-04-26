@@ -3,7 +3,7 @@
 Sorted by impact-to-effort. The loop picks the first `- [ ]` and works it end-to-end.
 
 - [x] **1. Add `src/app/error.tsx`** — global error boundary so uncaught Server Component throws (DB hiccup, Anthropic 401, malformed UUID) don't show Next's default error UI.
-- [ ] **2. Add `src/app/notes/[id]/loading.tsx`** — Skeleton card + Skeleton chat panel during cold-fetch.
+- [x] **2. Add `src/app/notes/[id]/loading.tsx`** — Skeleton card + Skeleton chat panel during cold-fetch.
 - [ ] **3. Validate UUIDs before DB lookup** — gate `getNote` / `listForNote` / `listChatMessages` so `/notes/abc` returns the not-found branch instead of 500.
 - [ ] **4. Run the shadcn sweep on `/notes` and `/notes/new`** — replace "New note" link with `<Button asChild>`; swap `text-zinc-* / divide-zinc-*` for semantic tokens (`text-muted-foreground`, `border-border`, `hover:bg-muted`).
 - [ ] **5. Title `break-words` + body collapse with "Show more"** — add `break-words` to titles + flashcard front/back; cap note body at `max-h-64` with toggle.
